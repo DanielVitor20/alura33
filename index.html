@@ -1,0 +1,164 @@
+<html><head><base href="." /><title>Jogo de Aventura - Escolhas e Consequências</title>
+<style>
+body {
+    font-family: 'Georgia', serif;
+    background: linear-gradient(135deg, #1a1c2c 0%, #4a1942 100%);
+    color: #fff;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.story-container {
+    background: rgba(0,0,0,0.7);
+    padding: 30px;
+    border-radius: 15px;
+    margin: 20px 0;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+button {
+    background: linear-gradient(45deg, #6b1f5d 0%, #8b2f8a 100%);
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-size: 16px;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#progress {
+    width: 100%;
+    height: 10px;
+    background: #2a1b3d;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+#progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff3366 0%, #ff6b6b 100%);
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+</style>
+</head>
+<body>
+
+<div id="progress">
+    <div id="progress-bar"></div>
+</div>
+
+<div class="story-container" id="story">
+    <h1>A Mansão Misteriosa</h1>
+    <p id="story-text"></p>
+    <div class="options-container" id="options">
+    </div>
+</div>
+
+<script>
+const story = {
+    start: {
+        text: "Você está em frente a uma antiga mansão abandonada. O ar está pesado e uma névoa misteriosa paira no ar. O que você faz?",
+        options: [
+            { text: "Entrar pela porta principal", nextScene: "hall", correct: true },
+            { text: "Dar a volta pela lateral", nextScene: "start", correct: false },
+            { text: "Olhar pela janela", nextScene: "start", correct: false }
+        ]
+    },
+    hall: {
+        text: "Você está no hall principal. Há três portas: uma vermelha, uma azul e uma verde. Você ouve sons estranhos vindos de uma delas.",
+        options: [
+            { text: "Abrir a porta vermelha", nextScene: "start", correct: false },
+            { text: "Abrir a porta verde", nextScene: "start", correct: false },
+            { text: "Abrir a porta azul", nextScene: "biblioteca", correct: true }
+        ]
+    },
+    biblioteca: {
+        text: "Você encontra uma biblioteca empoeirada. Em uma das estantes, há um livro brilhante. Na mesa central, há um mapa antigo. O que você investiga?",
+        options: [
+            { text: "Pegar o livro brilhante", nextScene: "livro", correct: true },
+            { text: "Examinar o mapa", nextScene: "start", correct: false },
+            { text: "Procurar em outras estantes", nextScene: "start", correct: false }
+        ]
+    },
+    livro: {
+        text: "O livro revela um segredo antigo sobre um tesouro escondido! Você completou sua jornada e descobriu o mistério da mansão!",
+        options: [
+            { text: "Jogar novamente", nextScene: "start", correct: true }
+        ]
+    }
+};
+
+let currentProgress = 0;
+const totalScenes = Object.keys(story).length - 1; // -1 porque o "start" não conta como progresso
+
+function updateProgress(scene) {
+    if (scene === 'start') {
+        currentProgress = 0;
+    } else {
+        currentProgress = (Object.keys(story).indexOf(scene) / totalScenes) * 100;
+    }
+    document.getElementById('progress-bar').style.width = `${currentProgress}%`;
+}
+
+function showScene(sceneName) {
+    const scene = story[sceneName];
+    const storyText = document.getElementById('story-text');
+    const optionsContainer = document.getElementById('options');
+    
+    storyText.textContent = scene.text;
+    optionsContainer.innerHTML = '';
+    
+    scene.options.forEach(option => {
+        const button = document.createElement('button');
+        button.textContent = option.text;
+        button.addEventListener('click', () => {
+            if (option.correct) {
+                showScene(option.nextScene);
+                updateProgress(option.nextScene);
+            } else {
+                alert('Resposta incorreta! Voltando ao início...');
+                showScene('start');
+                updateProgress('start');
+            }
+        });
+        optionsContainer.appendChild(button);
+    });
+
+    // Adiciona animação de fade
+    const storyContainer = document.getElementById('story');
+    storyContainer.classList.remove('fade-in');
+    void storyContainer.offsetWidth; // Força o reflow
+    storyContainer.classList.add('fade-in');
+}
+
+// Inicia o jogo
+showScene('start');
+</script>
+
+</body></html>
